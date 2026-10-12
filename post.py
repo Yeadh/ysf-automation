@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import datetime
 import requests
 import urllib.parse
@@ -28,6 +29,20 @@ ANGLES = [
 TEXT_MODEL = os.environ.get("TEXT_MODEL", "gemini-3.8-flash")
 
 client = genai.Client(api_key=GEMINI_KEY)
+def generate_with_retry(prompt, config=None):
+    models = [TEXT_MODEL, "gemini-3-flash-preview"]
+    last = None
+    for model in models:
+        for attempt in range(4):
+            try:
+                return client.models.generate_content(
+                    model=model, contents=prompt, config=config
+                )
+            except Exception as e:
+                last = e
+                print(f"{model} attempt {attempt + 1} failed: {e}")
+                time.sleep(10 * (attempt + 1))
+    raise last
 
 
 def make_text():
@@ -43,9 +58,8 @@ def make_text():
         "image_prompt (English; warm, modern illustration of a Bangladeshi family managing money "
         "relevant to the angle; absolutely NO text, letters or numbers in the image)."
     )
-    r = client.models.generate_content(
-        model=TEXT_MODEL,
-        contents=prompt,
+        r = generate_with_retry(
+        prompt,
         config=types.GenerateContentConfig(response_mime_type="application/json"),
     )
     return json.loads(r.text)

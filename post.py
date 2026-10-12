@@ -29,6 +29,8 @@ ANGLES = [
 TEXT_MODEL = os.environ.get("TEXT_MODEL", "gemini-3.8-flash")
 
 client = genai.Client(api_key=GEMINI_KEY)
+
+
 def generate_with_retry(prompt, config=None):
     models = [TEXT_MODEL, "gemini-3-flash-preview"]
     last = None
@@ -58,7 +60,7 @@ def make_text():
         "image_prompt (English; warm, modern illustration of a Bangladeshi family managing money "
         "relevant to the angle; absolutely NO text, letters or numbers in the image)."
     )
-        r = generate_with_retry(
+    r = generate_with_retry(
         prompt,
         config=types.GenerateContentConfig(response_mime_type="application/json"),
     )

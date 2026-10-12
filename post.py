@@ -48,7 +48,7 @@ def generate_with_retry(prompt, config=None):
 
 
 def make_text():
-    angle = ANGLES[datetime.date.today().toordinal() % len(ANGLES)]
+    angle = ANGLES[int(time.time() // 3600) % len(ANGLES)]
     prompt = (
         f"Brand: {BRAND}, ekta Bangla family finance app "
         "(ay-bay, budget, shonchoy, EMI, bill reminder, offline, PIN/fingerprint lock, bigyapon-mukto). "
@@ -90,6 +90,7 @@ def make_image(prompt):
             time.sleep(20)
     raise last
 
+
 def post_to_facebook(caption, image_bytes):
     url = f"https://graph.facebook.com/v21.0/{PAGE_ID}/photos"
     res = requests.post(
@@ -98,7 +99,7 @@ def post_to_facebook(caption, image_bytes):
         files={"source": ("post.jpg", image_bytes, "image/jpeg")},
         timeout=60,
     )
-   if not res.ok:
+    if not res.ok:
         print("Image size:", len(image_bytes), "bytes")
         print("Facebook error:", res.status_code, res.text)
         res.raise_for_status()

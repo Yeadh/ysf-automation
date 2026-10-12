@@ -68,17 +68,25 @@ def make_text():
 
 
 def make_image(prompt):
-    url = (
-        "https://image.pollinations.ai/prompt/"
-        + urllib.parse.quote(prompt)
-        + "?width=1024&height=1024&nologo=true"
-    )
-    r = requests.get(url, timeout=120)
-    r.raise_for_status()
-    if "image" not in r.headers.get("content-type", ""):
-        raise RuntimeError("Image paoa jayni")
-    return r.content
-
+    prompt = prompt[:400]
+    last = None
+    for attempt in range(5):
+        url = (
+            "https://image.pollinations.ai/prompt/"
+            + urllib.parse.quote(prompt)
+            + f"?width=1024&height=1024&nologo=true&seed={attempt + 1}"
+        )
+        try:
+            r = requests.get(url, timeout=120)
+            r.raise_for_status()
+            if "image" not in r.headers.get("content-type", ""):
+                raise RuntimeError("Image paoa jayni")
+            return r.content
+        except Exception as e:
+            last = e
+            print(f"Image attempt {attempt + 1} failed: {e}")
+            time.sleep(20)
+    raise last
 
 def post_to_facebook(caption, image_bytes):
     url = f"https://graph.facebook.com/v21.0/{PAGE_ID}/photos"

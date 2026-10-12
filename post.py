@@ -57,8 +57,10 @@ def make_text():
         "Return JSON with keys: "
         "caption (Bengali script, 3-4 short lines, friendly tone, 1-2 emoji, "
         f"ends with 'ডাউনলোড: {SITE_URL}' and 2-3 hashtags) and "
-        "image_prompt (English; warm, modern illustration of a Bangladeshi family managing money "
-        "relevant to the angle; absolutely NO text, letters or numbers in the image)."
+        "image_prompt (English; a photorealistic candid photograph, 35mm lens, natural window light, "
+        "of a middle-class Bangladeshi family at home reviewing household expenses with a notebook, "
+        "calculator and smartphone, relevant to the angle; realistic skin and hands, shallow depth of field; "
+        "no text, letters, numbers or logos in the image)."
     )
     r = generate_with_retry(
         prompt,
@@ -74,7 +76,7 @@ def make_image(prompt):
         url = (
             "https://image.pollinations.ai/prompt/"
             + urllib.parse.quote(prompt)
-            + f"?width=1024&height=1024&nologo=true&seed={attempt + 1}"
+            + f"?width=1024&height=1024&nologo=true&model=flux&seed={attempt + 1}"
         )
         try:
             r = requests.get(url, timeout=120)

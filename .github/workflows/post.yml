@@ -2,18 +2,25 @@ name: Auto FB Post
 
 on:
   schedule:
-    - cron: "0 3 * * *"
+    - cron: "0 * * * *"
   workflow_dispatch:
+
+concurrency:
+  group: fb-post
+  cancel-in-progress: false
 
 jobs:
   post:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install google-genai requests
+      - run: pip install google-genai requests playwright
+      - run: python -m playwright install --with-deps chromium
+      - run: sudo apt-get install -y fonts-noto-core
       - run: python post.py
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}

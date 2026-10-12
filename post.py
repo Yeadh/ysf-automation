@@ -2,6 +2,7 @@ import os
 import json
 import datetime
 import requests
+import urllib.parse
 from google import genai
 from google.genai import types
 
@@ -24,8 +25,7 @@ ANGLES = [
     "internet chhara offline hishab, PIN ar fingerprint lock e nirapotta",
     "bigyapon-mukto, shompurno Bangla app",
 ]
-TEXT_MODEL = os.environ.get("TEXT_MODEL", "gemini-2.5-flash")
-IMAGE_MODEL = os.environ.get("IMAGE_MODEL", "gemini-2.5-flash-image")
+TEXT_MODEL = os.environ.get("TEXT_MODEL", "gemini-3.8-flash")
 
 client = genai.Client(api_key=GEMINI_KEY)
 
@@ -52,11 +52,16 @@ def make_text():
 
 
 def make_image(prompt):
-    r = client.models.generate_content(model=IMAGE_MODEL, contents=prompt)
-    for part in r.candidates[0].content.parts:
-        if part.inline_data:
-            return part.inline_data.data
-    raise RuntimeError("Image generate hoyni")
+    url = (
+        "https://image.pollinations.ai/prompt/"
+        + urllib.parse.quote(prompt)
+        + "?width=1024&height=1024&nologo=true"
+    )
+    r = requests.get(url, timeout=120)
+    r.raise_for_status()
+    if "image" not in r.headers.get("content-type", ""):
+        raise RuntimeError("Image paoa jayni")
+    return r.content
 
 
 def post_to_facebook(caption, image_bytes):
@@ -64,7 +69,7 @@ def post_to_facebook(caption, image_bytes):
     res = requests.post(
         url,
         data={"message": caption, "access_token": PAGE_TOKEN},
-        files={"source": ("post.png", image_bytes, "image/png")},
+        files={"source": ("post.jpg", image_bytes, "image/jpeg")},
         timeout=60,
     )
     res.raise_for_status()

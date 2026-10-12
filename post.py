@@ -98,7 +98,10 @@ def post_to_facebook(caption, image_bytes):
         files={"source": ("post.jpg", image_bytes, "image/jpeg")},
         timeout=60,
     )
-    res.raise_for_status()
+   if not res.ok:
+        print("Image size:", len(image_bytes), "bytes")
+        print("Facebook error:", res.status_code, res.text)
+        res.raise_for_status()
     print("Posted:", res.json())
 
 
